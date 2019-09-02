@@ -30,9 +30,9 @@ def add_new_user(args, cursor):
 
 
 def change_user_password(args, cursor):
-    user_to_edit = User.find_by_email(args.username)
+    user_to_edit = User.find_by_email(cursor, args.username)
     if user_to_edit and check_password(args.password, user_to_edit.hashed_password):
-        user_to_edit.set_password(args.new_pass)
+        user_to_edit.set_password(args.new_pass, generate_salt())
         user_to_edit.save_to_db(cursor)
     else:
         raise Exception('Złe hasło lub użyszkodnik nie istnieje')
