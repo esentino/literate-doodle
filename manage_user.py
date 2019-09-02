@@ -18,32 +18,39 @@ def configure_parser():
 
 
 def add_new_user(args, cursor):
-    user = User.find_by_email(cursor, args.username)
-    if not user:
-        user = User()
-        user.email = args.username
-        user.username = args.username
-        user.set_password(args.password, generate_salt())
-        user.save_to_db(cursor)
+    new_user = User.find_by_email(cursor, args.username)
+    if not new_user:
+        new_user = User()
+        new_user.email = args.username
+        new_user.username = args.username
+        new_user.set_password(args.password, generate_salt())
+        new_user.save_to_db(cursor)
     else:
         raise Exception('User exists')
 
 
 def change_user_password(args, cursor):
-    user = User.find_by_email(args.username)
-    if user and check_password(args.password, user.hashed_password):
-        user.set_password(args.new_pass)
-        user.save_to_db(cursor)
+    user_to_edit = User.find_by_email(args.username)
+    if user_to_edit and check_password(args.password, user_to_edit.hashed_password):
+        user_to_edit.set_password(args.new_pass)
+        user_to_edit.save_to_db(cursor)
     else:
         raise Exception('Złe hasło lub użyszkodnik nie istnieje')
 
 
 def delete_me(args, cursor):
-    user = User.find_by_email(cursor, args.username)
-    if user and check_password(args.password, user.hashed_password):
-        user.delete(cursor)
+    user_to_delete = User.find_by_email(cursor, args.username)
+    if user_to_delete and check_password(args.password, user_to_delete.hashed_password):
+        user_to_delete.delete(cursor)
     else:
         raise Exception('Zły login lub hasło')
+
+
+def print_all_users(cursor):
+    users = User.find_all(cursor)
+    print('Lista użyszkodników')
+    for user in users:
+        print(user.email)
 
 
 if __name__ == '__main__':
@@ -76,10 +83,7 @@ if __name__ == '__main__':
             Jeśli użytkownik podał parametr -l, wyświetlamy wszystkich zarejestrowanych użytkowników (nie pokazujemy
             haseł).
             '''
-            users = User.find_all(cursor)
-            print('Lista użyszkodników')
-            for user in users:
-                print(user.email)
+            print_all_users(cursor)
         else:
             '''
             Jeśli użytkownik wprowadził parametry w konfiguracji innej niż podane na slajdach, ma mu się wyświetlić
